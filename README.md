@@ -73,7 +73,7 @@ Copy-Item -Recurse .\example\minimal_hal_keil .\practice\my_hal_project
 ### 基础库
 
 - `lib/stm32f4xx/`：当前推荐的默认 SPL / CMSIS 基础库。
-- `lib/STM32CubeF4/`：STM32CubeF4 中的 CMSIS、Device、示例和相关模板。
+- `lib/STM32CubeF4/`：裁剪后的 STM32CubeF4 依赖来源，主要保留 CMSIS Core、STM32F4 Device、启动/系统模板和上游元数据；官方板卡示例与媒体资源未保留。
 - `lib/stm32f4xx-hal-driver/`：单独放置的 STM32F4 HAL/LL Driver 组件，可视为本地版 `Drivers/STM32F4xx_HAL_Driver`。
 
 第三方库保留其原有 README、license 和版权声明。本仓库自有文档只说明如何使用这些库，不替代 ST、CMSIS、SPL、Cube、HAL/LL 等上游许可。
@@ -90,7 +90,7 @@ git clone https://github.com/DemoJustLuGuo/AI-friendly-STM32F407-develop-workflo
 cd AI-friendly-STM32F407-develop-workflows
 ```
 
-如果你希望放到别的目录，把 `D:\Projects` 换成自己的工作目录即可。这个仓库体积主要来自 `lib/STM32CubeF4/`，克隆时间取决于网络环境。
+如果你希望放到别的目录，把 `D:\Projects` 换成自己的工作目录即可。仓库仍包含 ST/CMSIS/HAL 等基础库文件，克隆时间取决于网络环境。
 
 ### 2. 做一次完整性检查
 

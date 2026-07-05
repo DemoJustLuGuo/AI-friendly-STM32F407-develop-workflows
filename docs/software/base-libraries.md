@@ -93,7 +93,7 @@ Add feature drivers only when used, for example `stm32f4xx_tim.c`, `stm32f4xx_sp
 
 ### Role
 
-`lib/STM32CubeF4` is the full ST STM32CubeF4 MCU package. It is retained as the authoritative HAL/LL package source and official example/reference tree.
+`lib/STM32CubeF4` is a trimmed STM32CubeF4 dependency source. It is retained for CMSIS Core, STM32F4 CMSIS Device files, startup/system templates, upstream metadata, and limited package documentation. Official board examples, applications, demonstrations, and media utilities are not retained in this public workflow repository.
 
 Important subdirectories:
 
@@ -103,8 +103,6 @@ Important subdirectories:
 | `Drivers/STM32F4xx_HAL_Driver/` | HAL/LL driver headers and sources |
 | `Drivers/BSP/` | ST board BSP drivers for supported official boards |
 | `Middlewares/` | Cube middleware such as FatFS, USB, RTOS-related components |
-| `Projects/` | Official examples, applications, and demonstrations for ST boards |
-| `Utilities/` | Utility components used by Cube examples |
 | `Documentation/` | Package documentation |
 
 ### Usage Rules
@@ -112,7 +110,6 @@ Important subdirectories:
 Use `STM32CubeF4` when:
 
 - A project explicitly chooses HAL/LL instead of SPL.
-- Official ST examples are needed as behavioral references.
 - Cube middleware or official board BSP code is needed.
 - The project needs CMSIS Device files from the Cube layout.
 
@@ -193,7 +190,7 @@ If LCD support is needed later, create or import a board-matched LCD driver in t
 | Project type | Default base |
 |---|---|
 | Current practice project using SPL | Copy from `lib/stm32f4xx` into project-local `lib/stm32f4xx` |
-| HAL/LL project using full Cube references | Copy required parts from `lib/STM32CubeF4` |
+| HAL/LL project using Cube CMSIS references | Copy required CMSIS parts from `lib/STM32CubeF4` |
 | HAL/LL project using standalone HAL driver | Copy CMSIS from `lib/STM32CubeF4` plus HAL driver from `lib/stm32f4xx-hal-driver` |
 
 For this workspace, SPL remains the preferred stack for current STM32F407 practice work unless the user explicitly chooses HAL/LL.

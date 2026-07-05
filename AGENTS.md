@@ -88,7 +88,7 @@ For HAL/LL projects, use this dependency combination:
 
 Project-level HAL/LL work must still provide project-owned `stm32f4xx_hal_conf.h`, interrupt handlers, MSP initialization, linker script/scatter file, and build settings. For STM32F407ZGTx with this HAL/CMSIS tree, use the `STM32F407xx` macro unless a project-level reason says otherwise.
 
-For clone-ready HAL/Keil projects, normally start from `example/minimal_hal_keil/`. Do not copy ST Eval-board `Projects/*/Templates` directly without removing Eval BSP dependencies, board macros, unsupported clock assumptions, and unused HAL modules.
+For clone-ready HAL/Keil projects, normally start from `example/minimal_hal_keil/`. The public repository does not retain STM32CubeF4 `Projects/` examples; do not reintroduce ST Eval-board templates directly without removing Eval BSP dependencies, board macros, unsupported clock assumptions, and unused HAL modules.
 
 ## Shared Software Development References
 
