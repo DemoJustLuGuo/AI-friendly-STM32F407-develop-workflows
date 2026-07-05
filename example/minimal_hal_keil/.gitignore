@@ -1,0 +1,17 @@
+/Output/
+/Listings/
+/Objects/
+/build/
+*.uvguix*
+*.uvoptx
+JLinkSettings.ini
+*.o
+*.d
+*.crf
+*.axf
+*.hex
+*.map
+*.lnp
+*.lst
+*.dep
+*.build_log.htm

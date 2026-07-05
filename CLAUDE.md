@@ -5,7 +5,8 @@
 This directory is the public, AI-friendly workflow base for STM32F407 board projects.
 
 - `example/minimal_spl_keil/` is a clone-ready Keil MDK-ARM v5 SPL minimal project template. It contains its own startup files, project-owned configuration files, and a minimal local SPL/CMSIS library subset under `Libraries/`.
-- `practice/` is intentionally not included in this public release. Users may create it locally by copying `example/minimal_spl_keil/` into a new project directory.
+- `example/minimal_hal_keil/` is a clone-ready Keil MDK-ARM v5 HAL minimal project template. It contains its own startup files, project-owned HAL configuration, CMSIS files, and a minimal local HAL driver subset under `Drivers/`.
+- `practice/` is intentionally not included in this public release. Users may create it locally by copying `example/minimal_spl_keil/` or `example/minimal_hal_keil/` into a new project directory.
 - `docs/hardware/schematic-stm32f407-board-c-v1.0.md` is the complete hardware reference for firmware development, containing pin mappings, peripheral electrical specifications, power system architecture, SPI bus arbitration rules, clock configuration, boot mode settings, and a 23-item firmware initialization checklist. Read this document before starting any firmware project to confirm hardware electrical characteristics.
 - `docs/software/` contains the shared software development references for BSP design, SPL usage, and standard project templates.
 - `docs/hardware/Schematic_STM32F407开发板-C-V1.0-2606_2026-06-22.pdf` is the original schematic PDF, used only for visual verification, PCB routing analysis, or when the Markdown index lacks a specific detail.
@@ -87,6 +88,8 @@ For HAL/LL projects, use this dependency combination:
 
 Project-level HAL/LL work must still provide project-owned `stm32f4xx_hal_conf.h`, interrupt handlers, MSP initialization, linker script/scatter file, and build settings. For STM32F407ZGTx with this HAL/CMSIS tree, use the `STM32F407xx` macro unless a project-level reason says otherwise.
 
+For clone-ready HAL/Keil projects, normally start from `example/minimal_hal_keil/`. Do not copy ST Eval-board `Projects/*/Templates` directly without removing Eval BSP dependencies, board macros, unsupported clock assumptions, and unused HAL modules.
+
 ## Shared Software Development References
 
 The workspace has shared software guidance under `docs/software/`. Treat these files as reusable workspace conventions, not as project-specific implementation records.
@@ -124,7 +127,11 @@ When the user asks to create, modify, debug, or explain a concrete firmware proj
 6. If the target directory does not contain `AGENTS.md`, create a project-level `AGENTS.md` before continuing with project changes.
 7. Keep project-specific decisions in the project-level `AGENTS.md`, not in this root file.
 
-If the requested project does not yet exist and the user wants an SPL/Keil project, copy `example/minimal_spl_keil/` into the requested project directory first, then update its project-level `AGENTS.md`, README, Keil output name, and source files for the new purpose. If the target architecture is not SPL/Keil, create the new project directory under the user-specified parent, then create its project-level `AGENTS.md` as part of initialization.
+If the requested project does not yet exist and the user wants an SPL/Keil project, copy `example/minimal_spl_keil/` into the requested project directory first, then update its project-level `AGENTS.md`, README, Keil output name, and source files for the new purpose.
+
+If the requested project does not yet exist and the user wants a HAL/Keil project, copy `example/minimal_hal_keil/` into the requested project directory first, then update its project-level `AGENTS.md`, README, Keil output name, HAL module selection, and source files for the new purpose.
+
+If the target architecture is neither SPL/Keil nor HAL/Keil, create the new project directory under the user-specified parent, then create its project-level `AGENTS.md` as part of initialization.
 
 ## Project-Level AGENTS.md Minimum Contents
 
@@ -206,6 +213,6 @@ During debugging:
 ## Root-Level Change Policy
 
 - Add or update root-level docs only for workspace-wide rules, hardware references, or shared operating conventions.
-- Do not modify `example/minimal_spl_keil/` while performing root documentation work unless the user explicitly asks for template or project-level changes.
+- Do not modify `example/minimal_spl_keil/` or `example/minimal_hal_keil/` while performing root documentation work unless the user explicitly asks for template or project-level changes.
 - Do not assume `practice/` exists in this public repository; it is normally a local user-created directory.
 - Do not run firmware builds from the root unless the target project and build method are clear.
