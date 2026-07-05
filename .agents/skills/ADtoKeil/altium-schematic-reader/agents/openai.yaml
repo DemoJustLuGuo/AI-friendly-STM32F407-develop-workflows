@@ -1,0 +1,7 @@
+interface:
+  display_name: "Altium Schematic Reader"
+  short_description: "Read Altium circuits for AI review."
+  default_prompt: "Use $altium-schematic-reader to inspect this Altium project and explain the circuit with designator, pin, net, and sheet evidence."
+
+policy:
+  allow_implicit_invocation: true

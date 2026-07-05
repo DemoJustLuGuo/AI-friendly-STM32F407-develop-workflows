@@ -1,0 +1,4 @@
+interface:
+  display_name: "Embedded Firmware From Hardware"
+  short_description: "Build maintainable MCU firmware from schematic and PCB evidence."
+  default_prompt: "Use the embedded-firmware-from-hardware skill to turn schematic/PCB findings into a clean, testable MCU firmware architecture and debug workflow."

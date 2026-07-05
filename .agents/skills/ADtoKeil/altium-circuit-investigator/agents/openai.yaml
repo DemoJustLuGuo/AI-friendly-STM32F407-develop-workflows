@@ -1,0 +1,4 @@
+interface:
+  display_name: "Altium Circuit Investigator"
+  short_description: "Evidence-led Altium circuit analysis."
+  default_prompt: "Use $altium-circuit-investigator to analyze an Altium schematic/PCB with net tracing, local schematic screenshots, component topology reasoning, and evidence-backed output."

@@ -1,0 +1,21 @@
+* text=auto
+
+*.pdf binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.bmp binary
+*.ico binary
+*.zip binary
+*.rar binary
+*.7z binary
+*.pack binary
+*.lib binary
+*.a binary
+*.o binary
+*.obj binary
+*.axf binary
+*.elf binary
+*.hex binary
+*.bin binary

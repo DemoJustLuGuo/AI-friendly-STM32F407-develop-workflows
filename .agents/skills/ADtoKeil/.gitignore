@@ -1,0 +1,32 @@
+# --- Local machine config (contains real install paths; keep out of VCS) ---
+keil/config.json
+**/.embeddedskills/
+.env
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# --- Generated evidence / build artifacts ---
+.pdf_pages/
+*.pymupdf.txt
+out/
+build/
+*.hex
+*.axf
+*.log
+
+# --- Node / Remotion (promo-video is a separate project, not part of this repo) ---
+node_modules/
+promo-video/
+
+# --- OS / editor ---
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+.claude/
+nul

@@ -1,0 +1,61 @@
+# Build outputs
+build/
+Build/
+Output/
+Outputs/
+Listings/
+Objects/
+out/
+tmp/
+
+# Embedded compiler artifacts
+*.o
+*.obj
+*.d
+*.crf
+*.axf
+*.elf
+*.hex
+*.bin
+*.map
+*.lnp
+*.lst
+*.dep
+*.htm
+*.build_log.htm
+*.scvd
+*.iex
+*.sct.bak
+
+# Keil / debugger local state
+*.uvguix*
+*.uvoptx
+*.uvgui.*
+JLinkSettings.ini
+*.dbgconf
+*.dbgconf.*
+
+# Local runtime state and caches
+.embeddedskills/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.cache/
+
+# Nested repositories and local metadata
+.git/
+.gitmodules
+
+# Archives and external binary drops
+*.rar
+*.zip
+*.7z
+*.tar
+*.tar.gz
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
