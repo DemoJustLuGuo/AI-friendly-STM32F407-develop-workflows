@@ -1,6 +1,6 @@
-# STM32F407 Workspace Base Libraries
+# STM32F407 Repository Base Libraries
 
-**Workspace**: `F:\CODE\STM32F407`  
+**Repository Role**: AI-friendly STM32F407 workflow base
 **Library Root**: `lib/`  
 **Default Practice Stack**: STM32F4xx Standard Peripheral Library (SPL)
 
@@ -14,11 +14,10 @@ This document records the stable library directories kept under `lib/` and how e
 lib/
 ├── stm32f4xx/
 ├── STM32CubeF4/
-├── stm32f4xx-hal-driver/
-└── AD9959模块驱动+PDF-V2.6/
+└── stm32f4xx-hal-driver/
 ```
 
-The first three directories are firmware development bases. `AD9959模块驱动+PDF-V2.6/` is a retained external module reference package and should not be treated as part of the standard STM32F407 base template.
+These three directories are firmware development bases. External AD9959 module packages are intentionally not published in this repository and should not be treated as part of the standard STM32F407 base template.
 
 ---
 
@@ -64,7 +63,7 @@ lib/stm32f4xx/CMSIS/inc
 lib/stm32f4xx/StdPeriph/inc
 ```
 
-Workspace-relative paths such as `../../lib/stm32f4xx/...` are acceptable only for temporary local experiments or when the project is intentionally not self-contained.
+Repository-relative paths such as `../../lib/stm32f4xx/...` are acceptable only for temporary local experiments or when the project is intentionally not self-contained.
 
 Use preprocessor defines:
 
@@ -173,46 +172,6 @@ Do not compile both HAL driver trees into the same target.
 
 ---
 
-## `lib/AD9959模块驱动+PDF-V2.6`
-
-### Role
-
-This directory is an external AD9959 DDS module dependency package. It is retained for future DDS-related projects, but it is not a workspace base library for ordinary STM32F407 firmware templates.
-
-Observed contents:
-
-| Path | Purpose |
-|---|---|
-| `README.md` | Package-level dependency guide |
-| `AGENTS.md` | Package maintenance and future project usage rules |
-| `AD9959移植到STM32F407指南.md` | Workspace-specific porting guide |
-| `1.AD9959代码/` | Vendor example code |
-| `2.芯片手册/` | AD9959 datasheets |
-| `3.原理图PDF/` | Module and driver-board schematics, plus schematic-reading Markdown |
-| `4.尺寸及定位图PDF/` | Mechanical drawings |
-| `5.AD9959模块-STM32接线说明/` | Vendor STM32 wiring notes and Markdown table |
-| `AD9959模块用户手册-简易_V1.1.pdf` | Module user manual |
-
-The vendor examples are documented as Keil 5 projects for a DDS driver board and ST firmware library 3.5.0. Treat them as reference material that must be ported before use on this STM32F407 board.
-
-For a future AD9959 project:
-
-- Copy this package, or a documented subset of it, into the project-local dependency tree when the project must be portable.
-- Read `README.md`, `AGENTS.md`, `AD9959移植到STM32F407指南.md`, the module schematic notes, and the English datasheet first.
-- Map every AD9959 signal to this board's actual available GPIO pins.
-- Wrap the ported DDS control code in a project-owned driver under `drivers/` or `bsp/`.
-- Do not place AD9959-specific behavior into the generic SPL project template.
-
-The typical reuse path is:
-
-```text
-vendor AD9959 example function -> AD9959 register/protocol intent -> project-owned driver -> STM32F407 BSP port -> application behavior
-```
-
-Do not reuse the vendor STM32F1 Keil project as the project template for STM32F407 work.
-
----
-
 ## Removed Non-Base Directories
 
 These directories were removed from `lib/` because they were not suitable as workspace base libraries:
@@ -223,6 +182,7 @@ These directories were removed from `lib/` because they were not suitable as wor
 | `lib/ili9341-hal` | Third-party HAL/CubeMX example, with STM32F7-specific files |
 | `lib/ili9341-spi-spl` | Third-party SPL example targeting STM32F103, not STM32F407 |
 | `lib/practice` | Practice/project material does not belong under shared library dependencies |
+| External AD9959 module package | Third-party module reference material; intentionally excluded from this public workflow base |
 
 If LCD support is needed later, create or import a board-matched LCD driver in the target project or in a clearly named shared driver package after confirming the actual schematic pins and SPI3 sharing rules.
 
@@ -235,7 +195,6 @@ If LCD support is needed later, create or import a board-matched LCD driver in t
 | Current practice project using SPL | Copy from `lib/stm32f4xx` into project-local `lib/stm32f4xx` |
 | HAL/LL project using full Cube references | Copy required parts from `lib/STM32CubeF4` |
 | HAL/LL project using standalone HAL driver | Copy CMSIS from `lib/STM32CubeF4` plus HAL driver from `lib/stm32f4xx-hal-driver` |
-| AD9959 DDS module project | Copy `lib/AD9959模块驱动+PDF-V2.6` or its required subset into the project, then add a project-owned AD9959 driver/port layer |
 
 For this workspace, SPL remains the preferred stack for current STM32F407 practice work unless the user explicitly chooses HAL/LL.
 

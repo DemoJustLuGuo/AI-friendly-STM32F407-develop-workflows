@@ -2,7 +2,7 @@
 
 **Library Version**: STM32F4xx_StdPeriph_Driver V1.3.0  
 **Target Board**: STM32F407ZGT6 Development Board  
-**Workspace**: `F:\CODE\STM32F407`
+**Repository Role**: AI-friendly STM32F407 workflow base
 
 This document provides quick access to commonly used STM32F4xx Standard Peripheral Library (SPL) APIs, initialization templates, and board-specific code examples. It is designed to accelerate firmware development by reducing the need to repeatedly consult the full SPL manual.
 

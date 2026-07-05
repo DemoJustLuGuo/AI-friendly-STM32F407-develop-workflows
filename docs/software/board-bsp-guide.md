@@ -1,7 +1,7 @@
 # STM32F407 Board Support Package (BSP) Design Guide
 
 **Target Board**: STM32F407ZGT6 Development Board  
-**Workspace**: `F:\CODE\STM32F407`  
+**Repository Role**: AI-friendly STM32F407 workflow base
 **Library**: STM32F4xx Standard Peripheral Library V1.3.0
 
 This document defines the Board Support Package (BSP) architecture and API specifications for the STM32F407 development board. The BSP provides unified, reusable driver interfaces for all onboard peripherals, enabling rapid firmware development across multiple projects.

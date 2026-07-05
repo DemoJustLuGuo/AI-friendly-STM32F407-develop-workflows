@@ -2,13 +2,13 @@
 
 ## Workspace Role
 
-This directory is the top-level workspace for STM32F407 board projects.
+This directory is the public, AI-friendly workflow base for STM32F407 board projects.
 
-- `example/` is a Keil v5 empty project/template area.
-- `practice/` is the training-project collection.
+- `example/minimal_spl_keil/` is a clone-ready Keil MDK-ARM v5 SPL minimal project template. It contains its own startup files, project-owned configuration files, and a minimal local SPL/CMSIS library subset under `Libraries/`.
+- `practice/` is intentionally not included in this public release. Users may create it locally by copying `example/minimal_spl_keil/` into a new project directory.
 - `docs/hardware/schematic-stm32f407-board-c-v1.0.md` is the complete hardware reference for firmware development, containing pin mappings, peripheral electrical specifications, power system architecture, SPI bus arbitration rules, clock configuration, boot mode settings, and a 23-item firmware initialization checklist. Read this document before starting any firmware project to confirm hardware electrical characteristics.
 - `docs/software/` contains the shared software development references for BSP design, SPL usage, and standard project templates.
-- `Schematic_STM32F407开发板-C-V1.0-2606_2026-06-22.pdf` is the original schematic PDF, used only for visual verification, PCB routing analysis, or when the Markdown index lacks a specific detail.
+- `docs/hardware/Schematic_STM32F407开发板-C-V1.0-2606_2026-06-22.pdf` is the original schematic PDF, used only for visual verification, PCB routing analysis, or when the Markdown index lacks a specific detail.
 
 Keep this root document focused on workspace routing and shared hardware references. Do not record the business logic, exercise content, or implementation details of a single project here.
 
@@ -27,7 +27,7 @@ Observed contents:
 - `lib/stm32f4xx/StdPeriph/inc/` contains STM32F4 SPL headers such as `stm32f4xx.h`, `system_stm32f4xx.h`, `stm32f4xx_gpio.h`, `stm32f4xx_rcc.h`, and `stm32f4xx_usart.h`.
 - `lib/stm32f4xx/StdPeriph/src/` contains SPL sources such as `system_stm32f4xx.c`, `startup_stm32f4xx.s`, `stm32f4xx_gpio.c`, `stm32f4xx_rcc.c`, and `stm32f4xx_usart.c`.
 
-Project-level SPL work should normally copy or reference these directories, then provide project-owned configuration files such as `stm32f4xx_conf.h`, interrupt handlers, linker script/scatter file, and build settings. For STM32F407ZGTx with this SPL tree, use the `STM32F40_41xxx` device-family macro unless a project-level reason says otherwise.
+Project-level SPL work should normally start from `example/minimal_spl_keil/` or copy the required SPL/CMSIS files into the project. Treat root `lib/` as the source library pool and reference material, not as a path that every portable Keil project should depend on. A project intended to be cloned, copied, or shared must include its own `stm32f4xx_conf.h`, interrupt handlers, startup file, required SPL `.c` files, linker/scatter settings, and build settings. For STM32F407ZGTx with this SPL tree, use the `STM32F40_41xxx` device-family macro unless a project-level reason says otherwise.
 
 ### STM32CubeF4 HAL/LL
 
@@ -94,6 +94,7 @@ The workspace has shared software guidance under `docs/software/`. Treat these f
 - `docs/software/board-bsp-guide.md` defines the STM32F407 board BSP architecture, common `BSP_StatusTypeDef`, module naming, file layout, API style, and onboard peripheral interfaces for LED, key, buzzer, DHT11, shared SPI3, USART2, and SysTick.
 - `docs/software/project-template.md` defines the standard firmware project layout, Keil MDK-ARM v5 target settings, GCC/`arm-none-eabi` template expectations, include paths, preprocessor defines, startup/linker placement, and quick-start project creation flow.
 - `docs/software/spl-quick-reference.md` provides quick SPL API references and board-specific initialization templates for RCC, GPIO, USART, SPI, timers, NVIC, and common onboard peripheral examples.
+- `docs/software/base-libraries.md` explains the role and source of the shared library directories published under `lib/`.
 
 For current STM32F407 practice work, prefer the SPL stack and the BSP style described in these documents unless the user explicitly chooses HAL/LL or another architecture.
 
@@ -103,7 +104,7 @@ When creating or reshaping project software:
 2. Use `docs/software/board-bsp-guide.md` for reusable board-facing code. Keep board pins, active levels, shared-bus selection, delays, and peripheral init inside `bsp/inc/` and `bsp/src/` rather than scattering them through application code.
 3. Use `docs/software/spl-quick-reference.md` for SPL initialization patterns and board-specific code examples.
 4. Keep application behavior in `src/` or an application-owned module. Do not put exercise-specific business logic into the shared BSP.
-5. Add only the SPL source files actually needed by the project, plus required common files such as `stm32f4xx_misc.c`, startup code, `system_stm32f4xx.c`, `stm32f4xx_conf.h`, and interrupt handlers.
+5. For clone-ready Keil projects, copy only the SPL source files actually needed by the project into the project tree, plus required common files such as `stm32f4xx_misc.c`, startup code, `system_stm32f4xx.c`, `stm32f4xx_conf.h`, and interrupt handlers. Do not leave the active project depending on a developer-specific shared-library path.
 6. For shared SPI3 devices, always centralize chip-select handling so Flash and LCD are never selected at the same time.
 
 For Codex work, `AGENTS.md` is the primary instruction file. `CLAUDE.md` may be created or kept alongside it for Claude Code compatibility when a project is intended to support both tools. When both files exist, keep their operational rules consistent; project setup, build commands, hardware assumptions, and verification steps should not diverge between them.
@@ -123,7 +124,7 @@ When the user asks to create, modify, debug, or explain a concrete firmware proj
 6. If the target directory does not contain `AGENTS.md`, create a project-level `AGENTS.md` before continuing with project changes.
 7. Keep project-specific decisions in the project-level `AGENTS.md`, not in this root file.
 
-If the requested project does not yet exist, create the new project directory under the user-specified parent, then create its project-level `AGENTS.md` as part of initialization.
+If the requested project does not yet exist and the user wants an SPL/Keil project, copy `example/minimal_spl_keil/` into the requested project directory first, then update its project-level `AGENTS.md`, README, Keil output name, and source files for the new purpose. If the target architecture is not SPL/Keil, create the new project directory under the user-specified parent, then create its project-level `AGENTS.md` as part of initialization.
 
 ## Project-Level AGENTS.md Minimum Contents
 
@@ -175,7 +176,7 @@ Use the schematic PDF only when:
 - Electrical connection direction must be traced for debugging.
 
 ```text
-Schematic_STM32F407开发板-C-V1.0-2606_2026-06-22.pdf
+docs/hardware/Schematic_STM32F407开发板-C-V1.0-2606_2026-06-22.pdf
 ```
 
 PDF verification is recommended for signal direction confirmation when debugging communication failures, connector physical pinout and orientation before external wiring, exact pull-up or pull-down resistor values if fine tuning is needed, component package and footprint for hardware modifications, and PCB trace routing for high-speed signal integrity analysis.
@@ -205,5 +206,6 @@ During debugging:
 ## Root-Level Change Policy
 
 - Add or update root-level docs only for workspace-wide rules, hardware references, or shared operating conventions.
-- Do not modify `example/` or `practice/` while performing root documentation work unless the user explicitly asks for project-level changes.
+- Do not modify `example/minimal_spl_keil/` while performing root documentation work unless the user explicitly asks for template or project-level changes.
+- Do not assume `practice/` exists in this public repository; it is normally a local user-created directory.
 - Do not run firmware builds from the root unless the target project and build method are clear.

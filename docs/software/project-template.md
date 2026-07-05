@@ -1,7 +1,7 @@
 # STM32F407 Project Template Guide
 
 **Target Board**: STM32F407ZGT6 Development Board  
-**Workspace**: `F:\CODE\STM32F407`  
+**Repository Role**: AI-friendly STM32F407 workflow base
 **Supported Toolchains**: Keil MDK-ARM v5, GNU ARM GCC (arm-none-eabi)
 
 This document defines standard project directory structures, build system templates, and configuration files for STM32F407 firmware projects. Following these templates ensures consistency across practice projects and simplifies project setup.

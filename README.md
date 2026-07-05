@@ -5,6 +5,7 @@
 - 板级硬件资料和引脚、电气特性说明。
 - SPL、STM32CubeF4、HAL/LL 等基础库。
 - 固件项目的目录、BSP、外设初始化和构建约定。
+- 一个可直接打开的 Keil SPL 最小工程模板。
 - 给 Codex、Claude Code 等 AI 编程助手读取的工作规则。
 - 一组可复用的嵌入式开发辅助 skill 和脚本。
 
@@ -19,6 +20,8 @@
 ├── docs/
 │   ├── hardware/
 │   └── software/
+├── example/
+│   └── minimal_spl_keil/
 ├── lib/
 │   ├── STM32CubeF4/
 │   ├── stm32f4xx/
@@ -49,6 +52,20 @@
 - `spl-quick-reference.md`：基于 STM32F4 Standard Peripheral Library 的 RCC、GPIO、USART、SPI、定时器、NVIC 等初始化模板。
 - `base-libraries.md`：本仓库内基础库的来源和用途说明。
 
+### 最小工程模板
+
+`example/minimal_spl_keil/` 是一个可直接打开的 Keil MDK-ARM v5 最小 SPL 工程模板。它不是只写了目录结构的空壳，而是从本地已经验证能构建的 LED 闪烁练习工程中抽取出来，再删掉练习逻辑后整理成的最小模板。
+
+这个模板默认只做一件事：使用 8MHz HSE 配置系统时钟，初始化 PA5/PA4 上的 LED1/LED2，并在主循环中翻转两个 LED。它包含项目自己的 `Startup/`、`User/` 和必要 SPL/CMSIS 子集，Keil 工程文件也指向模板内部的 `Libraries/`，不会依赖你电脑上的某个固定工作区路径或仓库根目录外的共享库路径。
+
+建议新项目优先从它开始：
+
+```powershell
+Copy-Item -Recurse .\example\minimal_spl_keil .\practice\my_first_project
+```
+
+复制后再改项目名、应用逻辑和项目级 `AGENTS.md`。添加新外设时，把需要的 SPL `.c` 文件复制进项目自己的 `Libraries/STM32F4xx_StdPeriph_Driver/src/`，同时在 `User/stm32f4xx_conf.h` 里打开对应头文件。这样项目目录被单独复制给别人时仍然能打开和构建。
+
 ### 基础库
 
 - `lib/stm32f4xx/`：当前推荐的默认 SPL / CMSIS 基础库。
@@ -64,12 +81,12 @@
 ### 1. 克隆仓库
 
 ```powershell
-cd F:\CODE
+cd D:\Projects
 git clone https://github.com/DemoJustLuGuo/AI-friendly-STM32F407-develop-workflows.git
 cd AI-friendly-STM32F407-develop-workflows
 ```
 
-如果你希望放到别的目录，把 `F:\CODE` 换成自己的工作目录即可。这个仓库体积主要来自 `lib/STM32CubeF4/`，克隆时间取决于网络环境。
+如果你希望放到别的目录，把 `D:\Projects` 换成自己的工作目录即可。这个仓库体积主要来自 `lib/STM32CubeF4/`，克隆时间取决于网络环境。
 
 ### 2. 做一次完整性检查
 
@@ -117,34 +134,42 @@ docs/software/spl-quick-reference.md
 
 如果你使用 Codex、Claude Code 或其他 AI 编程助手，请让它先读取 `AGENTS.md`。这样它会知道：日常固件开发优先使用 SPL，项目代码应有自己的项目级 `AGENTS.md`，BSP 代码不要和练习业务逻辑混在一起，SPI3 上 Flash 和 LCD 的片选必须集中管理。
 
-### 5. 创建自己的项目目录
+### 5. 从最小模板创建自己的项目
 
-本仓库没有把本地 `practice/` 练习工程一起发布。克隆后，你可以按自己的需要创建项目，例如：
+本仓库没有把本地 `practice/` 练习工程完整发布，但提供了一个自包含的最小 Keil SPL 模板。克隆后建议先从模板复制出自己的项目，而不是从零拼 Keil 工程和库路径：
 
 ```powershell
 mkdir practice
-mkdir practice\led_blink
+Copy-Item -Recurse .\example\minimal_spl_keil .\practice\led_blink
 ```
 
-新项目建议至少包含：
+复制后，先打开 `practice\led_blink\minimal_spl_keil.uvprojx` 构建一次，确认模板在你的 Keil 环境里可用。然后再根据项目需要改名和扩展。最小模板已经包含：
 
 ```text
 practice/led_blink/
 ├── AGENTS.md
-├── src/
-├── bsp/
-│   ├── inc/
-│   └── src/
-├── Libraries/ 或 vendor/
-├── Project/ 或 MDK-ARM/
-└── README.md
+├── README.md
+├── minimal_spl_keil.uvprojx
+├── Startup/
+├── User/
+└── Libraries/
+    ├── CMSIS/inc/
+    └── STM32F4xx_StdPeriph_Driver/
 ```
 
-项目级 `AGENTS.md` 应说明这个项目的目标、芯片和开发板、使用 SPL 还是 HAL/LL、构建方式、使用到的板载外设、电气特性、验证方法，以及哪些 IDE 生成文件或输出目录不应随意修改。
+如果你希望项目名更整洁，可以在复制后把 `.uvprojx` 文件名和 Keil 的输出名一起改掉。不要只改文件夹名后就假定工程内部路径也自动更新。
+
+扩展项目时建议保持这个原则：
+
+```text
+项目能独立构建所需的启动文件、配置文件、SPL 源文件和第三方驱动，应该放在项目目录内。
+```
+
+仓库根目录的 `lib/` 适合作为“取材来源”和参考，不建议让一个准备发给别人或单独复制的 Keil 工程长期依赖 `..\..\lib` 这类共享相对路径。项目级 `AGENTS.md` 应说明这个项目的目标、芯片和开发板、使用 SPL 还是 HAL/LL、构建方式、使用到的板载外设、电气特性、验证方法，以及哪些 IDE 生成文件或输出目录不应随意修改。
 
 ### 6. 选择固件库路线
 
-一般练习项目建议先走 SPL：
+一般练习项目建议先走 SPL。新增项目可以从 `example/minimal_spl_keil/` 复制起步；如果要手动取库，来源是：
 
 ```text
 lib/stm32f4xx/CMSIS/inc/
