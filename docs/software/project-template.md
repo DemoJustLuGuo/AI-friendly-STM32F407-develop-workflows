@@ -1,34 +1,41 @@
 # STM32F407 Project Template Guide
 
 **Target Board**: STM32F407ZGT6 Development Board  
-**Repository Role**: AI-friendly STM32F407 workflow base
+**Repository Role**: STM32F407-AI-develop-workflows base
 **Supported Toolchains**: Keil MDK-ARM v5, GNU ARM GCC (arm-none-eabi)
 
-This document defines standard project directory structures, build system templates, and configuration files for STM32F407 firmware projects. Following these templates ensures consistency across practice projects and simplifies project setup.
+This document defines standard project directory structures, build system templates, and configuration files for STM32F407 firmware projects. Following these templates keeps project setup reproducible across local and shared environments.
 
 ---
 
-## Shared Library Baseline
+## Firmware Stack Selection
 
 Use `docs/software/base-libraries.md` as the source of truth for the workspace-level `lib/` inventory.
 
-For current STM32F407 practice projects, the default firmware source is:
+Each project must choose its firmware stack during initialization:
+
+| Stack | Start from | Main dependency source | Required project macro |
+|---|---|---|---|
+| SPL | `example/minimal_spl_keil/` | `lib/stm32f4xx/` | `STM32F40_41xxx`, `USE_STDPERIPH_DRIVER` |
+| HAL/LL | `example/minimal_hal_keil/` | `lib/STM32CubeF4/Drivers/CMSIS/` plus `lib/stm32f4xx-hal-driver/` | `STM32F407xx` |
+
+The chosen stack must be recorded in the project-level `AGENTS.md`, build settings, configuration header, include paths, and source-file list. Do not leave stack selection implicit.
 
 ```text
-lib/stm32f4xx
+projects/<project-name>/
 ```
 
-This workspace-level directory is the source used to create project-local library copies. Small projects should normally carry the library files they need under their own `lib/` directory so the project can be sent to another machine and still build without requiring the full workspace.
+`projects/` is the recommended local workspace name for user-created projects. It is not part of the public workflow base unless a downstream repository intentionally tracks concrete projects.
 
-This provides the SPL-oriented `CMSIS/` and `StdPeriph/` trees used by the standard project template. HAL/LL projects should intentionally select either the full `lib/STM32CubeF4` package or the `lib/STM32CubeF4` Cube CMSIS files plus `lib/stm32f4xx-hal-driver`, as described in the base library guide.
+Small projects should normally carry the library files they need under their own `lib/` or stack-specific vendor directory so the project can be sent to another machine and still build without requiring the full workflow repository.
 
-Do not use external module packages, LCD examples, or practice projects as generic template dependencies unless the target project explicitly needs them and their hardware mappings have been verified.
+Do not use unrelated example packages, external module demos, or another project directory as generic template dependencies unless the target project explicitly needs them and their hardware mappings have been verified.
 
 ---
 
 ## Table of Contents
 
-1. [Shared Library Baseline](#shared-library-baseline)
+1. [Firmware Stack Selection](#firmware-stack-selection)
 2. [Project Directory Structure](#project-directory-structure)
 3. [Keil MDK-ARM Project Template](#keil-mdk-arm-project-template)
 4. [GNU ARM GCC Makefile Template](#gnu-arm-gcc-makefile-template)
@@ -52,9 +59,12 @@ project-name/
 │   └── src/
 │
 ├── lib/                        # Project-local firmware library subset
-│   └── stm32f4xx/
+│   ├── stm32f4xx/              # SPL projects
+│   │   ├── CMSIS/
+│   │   └── StdPeriph/
+│   └── hal/                    # HAL/LL projects may use a project-specific layout
 │       ├── CMSIS/
-│       └── StdPeriph/
+│       └── STM32F4xx_HAL_Driver/
 │
 ├── src/                        # Application source code
 │   ├── main.c
@@ -90,13 +100,13 @@ project-name/
 | `startup/` | Startup code and linker scripts | Yes |
 | `build/` | Build artifacts (obj, bin, hex) | No |
 
-For workspace-only experiments, a project may reference `../../lib/...` directly to avoid duplication. For practice deliverables, examples sent to others, or any project expected to build outside this workspace, copy the required library subset into the project-level `lib/` directory and point the build system at that local copy.
+For workspace-only experiments, a project may reference `../../lib/...` directly to avoid duplication. For deliverables, examples sent to others, or any project expected to build outside this workflow repository, copy the required library subset into the project-level `lib/` directory and point the build system at that local copy.
 
 ---
 
 ## Keil MDK-ARM Project Template
 
-### Project Structure in Keil
+### SPL Project Structure in Keil
 
 ```
 Project Target: STM32F407ZGTx
@@ -125,6 +135,8 @@ Project Target: STM32F407ZGTx
     └── startup/startup_stm32f40_41xxx.s
 ```
 
+For HAL/LL projects, use the same Keil grouping idea but replace `StdPeriph` with `HAL_Driver`, include the project-owned `stm32f4xx_hal_conf.h`, and add only the HAL modules required by the firmware.
+
 ### Keil Project Settings
 
 #### Target Options
@@ -152,6 +164,14 @@ USE_STDPERIPH_DRIVER
 HSE_VALUE=8000000
 ```
 
+For HAL/LL projects, use:
+
+```text
+STM32F407xx
+USE_HAL_DRIVER
+HSE_VALUE=8000000
+```
+
 **Optimization**: `Level 0 (-O0)` for debug, `Level 3 (-O3)` for release
 
 **C99 Mode**: Enabled
@@ -168,18 +188,20 @@ Before the first build of a generated or copied Keil project, verify these items
 2. **Clock macro must be explicit**:
    - Add `HSE_VALUE=8000000` to Keil C/C++ preprocessor defines for this board.
    - Missing this macro can produce `#error "OSC value not defined!"` from the device header.
-3. **SPL source filenames must match this workspace**:
+3. **Selected-stack source filenames must match this workspace**:
    - This workspace uses `lib/stm32f4xx/StdPeriph/src/stm32f4xx_misc.c`, not `misc.c`.
    - Add only the SPL source files used by the project, plus required common files such as `stm32f4xx_rcc.c`, `stm32f4xx_gpio.c`, `stm32f4xx_flash.c`, `stm32f4xx_misc.c`, and feature drivers such as `stm32f4xx_spi.c` or `stm32f4xx_adc.c`.
-4. **SPL header names must match this workspace**:
+   - For HAL/LL projects, add `stm32f4xx_hal.c`, MSP/configuration files, and only the required module sources such as `stm32f4xx_hal_gpio.c`, `stm32f4xx_hal_rcc.c`, or LL module files.
+4. **Header names must match the selected stack**:
    - Include `stm32f4xx_misc.h` from `stm32f4xx_conf.h`, not `misc.h`, unless a compatibility header exists in the project.
+   - For HAL/LL, copy `stm32f4xx_hal_conf_template.h` into the project as `stm32f4xx_hal_conf.h` and enable only the modules used by the target.
 5. **Project XML path check**:
    - Every `<FilePath>` in `.uvprojx` should point to an existing file before opening Keil.
    - Include paths should cover project-owned headers and both project-local library include roots:
      `lib/stm32f4xx/CMSIS/inc` and `lib/stm32f4xx/StdPeriph/inc`.
    - If a temporary workspace-only project references `../../lib/...`, document that it is not self-contained.
 6. **Warnings are part of the preflight result**:
-   - Treat unused functions and stale copied code as cleanup items before handing off a practice project.
+   - Treat unused functions and stale copied code as cleanup items before handing off a project.
    - Target state for template-derived projects is `0 errors, 0 warnings`.
 
 #### Linker Settings
@@ -212,7 +234,7 @@ Before the first build of a generated or copied Keil project, verify these items
 
 The current standard path is Keil MDK-ARM. GCC support is allowed, but the Makefile must be generated and verified per project because startup, linker script, compiler flags, and library-copy layout must match the chosen toolchain.
 
-For GCC projects, use the same project-local library policy:
+For GCC projects, use the same project-local library policy. An SPL project typically needs:
 
 ```text
 lib/stm32f4xx/CMSIS/inc
@@ -221,6 +243,8 @@ lib/stm32f4xx/StdPeriph/src/
 ```
 
 Do not treat this section as a complete GCC build file until a verified workspace GCC template exists.
+
+A HAL/LL GCC project should instead use Cube CMSIS paths, the `startup_stm32f407xx.s` startup file, a verified STM32F407ZGTx linker script, and the selected HAL/LL source list.
 
 ---
 
@@ -231,7 +255,8 @@ Do not treat this section as a complete GCC build file until a verified workspac
 #### Step 1: Create Project Directory
 
 ```bash
-cd practice
+mkdir projects
+cd projects
 mkdir my-new-project
 cd my-new-project
 ```
@@ -244,7 +269,7 @@ mkdir src inc bsp startup lib build
 
 #### Step 3: Copy Required Library Files
 
-For a self-contained SPL project, copy the required library subset from the workspace base library:
+For a self-contained SPL project, copy the required library subset from the workflow base library:
 
 ```bash
 mkdir -p lib/stm32f4xx
@@ -253,6 +278,8 @@ cp -r ../../lib/stm32f4xx/StdPeriph lib/stm32f4xx/
 ```
 
 If the project does not use USB, FatFS, or DSP functions, do not copy those optional trees into the project. Add only the source files required by the Keil target.
+
+For a self-contained HAL/LL project, copy CMSIS from `lib/STM32CubeF4` and the HAL driver from either `lib/stm32f4xx-hal-driver` or `lib/STM32CubeF4/Drivers/STM32F4xx_HAL_Driver`. Choose one HAL driver source and document that choice.
 
 #### Step 4: Create Boilerplate Files
 
@@ -276,7 +303,7 @@ Create or copy the project-owned files:
 
 #### Step 6: Configure Library Paths
 
-**In Keil**: Add include paths:
+**In Keil SPL projects**: Add include paths:
 
 ```
 inc
@@ -295,6 +322,18 @@ lib/stm32f4xx/StdPeriph/src/stm32f4xx_misc.c
 ```
 
 Then add feature drivers such as `stm32f4xx_tim.c`, `stm32f4xx_spi.c`, `stm32f4xx_usart.c`, or `stm32f4xx_adc.c` only when used.
+
+For HAL/LL projects, add the project-local equivalents of:
+
+```text
+inc
+bsp/inc
+lib/STM32CubeF4/Drivers/CMSIS/Include
+lib/STM32CubeF4/Drivers/CMSIS/Device/ST/STM32F4xx/Include
+lib/stm32f4xx-hal-driver/Inc
+```
+
+Then add only the required HAL/LL sources.
 
 #### Step 7: Build and Test
 

@@ -49,14 +49,14 @@ minimal_hal_keil/
 推荐复制整个目录：
 
 ```powershell
-Copy-Item -Recurse .\example\minimal_hal_keil .\practice\hal_led_blink
+Copy-Item -Recurse .\example\minimal_hal_keil .\projects\hal_led_blink
 ```
 
 复制后按顺序处理：
 
-1. 先打开并构建一次，确认本机 Keil 环境正常。
+1. 按项目级 `AGENTS.md` 的占位段完成环境初始化，确认本机 Keil/EIDE/GCC 能力。
 2. 根据需要重命名 `.uvprojx` 和 Keil 输出名。
-3. 修改项目级 `AGENTS.md`，写清楚新项目目标、HAL 模块、使用外设、构建和验证方式。
+3. 修改项目级 `AGENTS.md`，写清楚新项目目标、环境探测结果、HAL 模块、使用外设、构建和验证方式。
 4. 新增外设时，把对应 HAL `.c` 文件复制到 `Drivers/STM32F4xx_HAL_Driver/Src/`，并在 `User/stm32f4xx_hal_conf.h` 中打开对应模块宏。
 5. 每增加一个外设先构建一次，再继续叠加功能。
 

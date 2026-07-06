@@ -1,6 +1,6 @@
 # STM32F407 SPL Keil 最小模板
 
-这是一个自包含的 STM32F407ZGT6 Keil MDK-ARM v5 最小 SPL 工程模板。它来自已验证可构建的 LED 闪烁练习工程，整理时去掉了练习逻辑，只保留建立新项目最容易缺失的部分：Keil 工程文件、启动文件、系统时钟文件、SPL 配置文件、中断文件，以及能独立构建的最小 CMSIS/SPL 库子集。
+这是一个自包含的 STM32F407ZGT6 Keil MDK-ARM v5 最小 SPL 工程模板。它只保留建立新项目最容易缺失的部分：Keil 工程文件、启动文件、系统时钟文件、SPL 配置文件、中断文件，以及能独立构建的最小 CMSIS/SPL 库子集。
 
 默认固件只做一个可观察的心跳：使用板载 8MHz HSE 配置 168MHz SYSCLK，初始化 LED1 和 LED2，然后在主循环中翻转两个 LED。确认这个模板能编译、烧录、看到 LED 闪烁后，再添加按键、定时器、串口、SPI、LCD、传感器或应用逻辑。
 
@@ -49,14 +49,14 @@ minimal_spl_keil/
 推荐复制整个目录，而不是只复制 `main.c`：
 
 ```powershell
-Copy-Item -Recurse .\example\minimal_spl_keil .\practice\led_blink
+Copy-Item -Recurse .\example\minimal_spl_keil .\projects\led_blink
 ```
 
 复制后按顺序处理：
 
-1. 打开并构建一次，确认本机 Keil 环境正常。
+1. 按项目级 `AGENTS.md` 的占位段完成环境初始化，确认本机 Keil/EIDE/GCC 能力。
 2. 根据需要重命名 `.uvprojx` 和 Keil 输出名。
-3. 修改项目级 `AGENTS.md`，写清楚新项目目标、使用外设、构建和验证方式。
+3. 修改项目级 `AGENTS.md`，写清楚新项目目标、环境探测结果、使用外设、构建和验证方式。
 4. 在 `User/main.c` 或后续 `src/`、`bsp/` 中添加项目代码。
 5. 新增外设时，把对应 SPL `.c` 文件复制到 `Libraries/STM32F4xx_StdPeriph_Driver/src/`，并在 `User/stm32f4xx_conf.h` 中打开对应头文件。
 6. 每增加一个外设先构建一次，再继续叠加功能。

@@ -6,12 +6,34 @@ This directory is the public, AI-friendly workflow base for STM32F407 board proj
 
 - `example/minimal_spl_keil/` is a clone-ready Keil MDK-ARM v5 SPL minimal project template. It contains its own startup files, project-owned configuration files, and a minimal local SPL/CMSIS library subset under `Libraries/`.
 - `example/minimal_hal_keil/` is a clone-ready Keil MDK-ARM v5 HAL minimal project template. It contains its own startup files, project-owned HAL configuration, CMSIS files, and a minimal local HAL driver subset under `Drivers/`.
-- `practice/` is intentionally not included in this public release. Users may create it locally by copying `example/minimal_spl_keil/` or `example/minimal_hal_keil/` into a new project directory.
+- `projects/` is the recommended local workspace name for user-created firmware projects. It is intentionally not included in this public workflow base; create it locally and copy either minimal template into a project-specific subdirectory.
 - `docs/hardware/schematic-stm32f407-board-c-v1.0.md` is the complete hardware reference for firmware development, containing pin mappings, peripheral electrical specifications, power system architecture, SPI bus arbitration rules, clock configuration, boot mode settings, and a 23-item firmware initialization checklist. Read this document before starting any firmware project to confirm hardware electrical characteristics.
-- `docs/software/` contains the shared software development references for BSP design, SPL usage, and standard project templates.
+- `docs/software/` contains the shared software development references for BSP design, SPL/HAL library selection, and standard project templates.
+- `docs/drivers/` may be created for reusable driver documentation, peripheral module notes, driver API contracts, and porting records that should be read before project-specific driver work.
+- `drivers/` may be created for workspace-level reusable driver source code. Use it for board-verified or module-verified drivers intended for multiple projects, not for one project's business logic.
 - `docs/hardware/Schematic_STM32F407开发板-C-V1.0-2606_2026-06-22.pdf` is the original schematic PDF, used only for visual verification, PCB routing analysis, or when the Markdown index lacks a specific detail.
 
 Keep this root document focused on workspace routing and shared hardware references. Do not record the business logic, exercise content, or implementation details of a single project here.
+
+## Global Environment Initialization
+
+This workflow base is intentionally environment-neutral until a coding agent initializes a concrete project on the current machine. Before creating, modifying, building, or debugging any firmware project, the agent must inspect the available toolchain and record the confirmed environment in the target project's `AGENTS.md`. If that project also has `CLAUDE.md`, keep the two project-level files consistent.
+
+Initialization probes must answer:
+
+- Whether Keil MDK-ARM v5 is installed, where `UV4.exe` or `UV5.exe` is located, and whether command-line build is available.
+- Whether the usable Keil compiler is ARMCC5 or ARMClang6, and whether copied `.uvprojx` templates need compiler migration.
+- Whether the STM32F4 Device Family Pack required by the templates is installed.
+- Whether VS Code + EIDE is available and which compiler path EIDE can use.
+- Whether `arm-none-eabi-gcc`, `make`, or `cmake` is available for non-Keil builds.
+- Which flash/debug tools are available, such as ST-Link, J-Link, OpenOCD, pyOCD, or vendor CLI tools.
+- Whether each selected project has a verified build path; if Keil and EIDE are unavailable, what build files or commands must be generated for that project.
+
+### Project Environment Record
+
+Each project-level `AGENTS.md` must include a project environment section after initialization. It should record the confirmed local toolchain state for that project, including build commands that actually work on this machine.
+
+Keep this root section as guidance only. Do not replace it with one machine's state; different projects or clones may use different Keil, EIDE, or GCC paths.
 
 ## Shared Firmware Dependencies
 
@@ -19,7 +41,7 @@ The workspace has shared firmware libraries under `lib/`.
 
 ### Standard Peripheral Library
 
-Use `lib/stm32f4xx` as the default dependency base for current STM32F407 firmware work unless the user explicitly requests another stack.
+`lib/stm32f4xx` is the workspace SPL dependency base. Use it when a project explicitly chooses the Standard Peripheral Library stack.
 
 Observed contents:
 
@@ -32,7 +54,7 @@ Project-level SPL work should normally start from `example/minimal_spl_keil/` or
 
 ### STM32CubeF4 HAL/LL
 
-`lib/stm32f4xx-hal-driver` is the STM32F4 HAL/LL driver component and can be used as the HAL/LL driver source when a project explicitly chooses the HAL/LL stack.
+`lib/STM32CubeF4` and `lib/stm32f4xx-hal-driver` are the workspace HAL/LL dependency bases. Use this combination when a project explicitly chooses the HAL/LL stack.
 
 Observed contents:
 
@@ -88,27 +110,31 @@ For HAL/LL projects, use this dependency combination:
 
 Project-level HAL/LL work must still provide project-owned `stm32f4xx_hal_conf.h`, interrupt handlers, MSP initialization, linker script/scatter file, and build settings. For STM32F407ZGTx with this HAL/CMSIS tree, use the `STM32F407xx` macro unless a project-level reason says otherwise.
 
-For clone-ready HAL/Keil projects, normally start from `example/minimal_hal_keil/`. The public repository does not retain STM32CubeF4 `Projects/` examples; do not reintroduce ST Eval-board templates directly without removing Eval BSP dependencies, board macros, unsupported clock assumptions, and unused HAL modules.
+For clone-ready HAL/Keil projects, normally start from `example/minimal_hal_keil/`. Do not import ST Eval-board examples directly as project templates unless Eval BSP dependencies, board macros, unsupported clock assumptions, and unused HAL modules have been removed or deliberately documented.
 
 ## Shared Software Development References
 
 The workspace has shared software guidance under `docs/software/`. Treat these files as reusable workspace conventions, not as project-specific implementation records.
 
 - `docs/software/board-bsp-guide.md` defines the STM32F407 board BSP architecture, common `BSP_StatusTypeDef`, module naming, file layout, API style, and onboard peripheral interfaces for LED, key, buzzer, DHT11, shared SPI3, USART2, and SysTick.
-- `docs/software/project-template.md` defines the standard firmware project layout, Keil MDK-ARM v5 target settings, GCC/`arm-none-eabi` template expectations, include paths, preprocessor defines, startup/linker placement, and quick-start project creation flow.
+- `docs/software/project-template.md` defines the standard firmware project layout, stack-selection step, Keil MDK-ARM v5 target settings, GCC/`arm-none-eabi` template expectations, include paths, preprocessor defines, startup/linker placement, and quick-start project creation flow.
 - `docs/software/spl-quick-reference.md` provides quick SPL API references and board-specific initialization templates for RCC, GPIO, USART, SPI, timers, NVIC, and common onboard peripheral examples.
 - `docs/software/base-libraries.md` explains the role and source of the shared library directories published under `lib/`.
+- `docs/drivers/`, when present, contains shared driver documentation and module-specific notes that coding agents should check before implementing or adapting a reusable driver.
+- `drivers/`, when present, contains shared driver source packages. Each driver package should include its own README or AGENTS file describing supported firmware stacks, hardware dependencies, source files, integration steps, and verification status.
 
-For current STM32F407 practice work, prefer the SPL stack and the BSP style described in these documents unless the user explicitly chooses HAL/LL or another architecture.
+For STM32F407 project work, choose SPL or HAL/LL during project initialization and document that choice in the project-level `AGENTS.md`. Do not treat either stack as implicit for a new project.
 
 When creating or reshaping project software:
 
 1. Use `docs/software/project-template.md` for directory layout, project metadata, build files, and Keil/GCC settings.
 2. Use `docs/software/board-bsp-guide.md` for reusable board-facing code. Keep board pins, active levels, shared-bus selection, delays, and peripheral init inside `bsp/inc/` and `bsp/src/` rather than scattering them through application code.
-3. Use `docs/software/spl-quick-reference.md` for SPL initialization patterns and board-specific code examples.
+3. Use `docs/software/spl-quick-reference.md` when the project chooses SPL. For HAL/LL projects, use `docs/software/base-libraries.md` for dependency paths and keep HAL module selection in the project-level documentation.
 4. Keep application behavior in `src/` or an application-owned module. Do not put exercise-specific business logic into the shared BSP.
-5. For clone-ready Keil projects, copy only the SPL source files actually needed by the project into the project tree, plus required common files such as `stm32f4xx_misc.c`, startup code, `system_stm32f4xx.c`, `stm32f4xx_conf.h`, and interrupt handlers. Do not leave the active project depending on a developer-specific shared-library path.
+5. For clone-ready Keil projects, copy only the library source files actually needed by the chosen stack into the project tree, plus required project-owned files such as configuration headers, interrupt handlers, startup code, system source, linker/scatter settings, and build metadata. Do not leave the active project depending on a developer-specific shared-library path.
 6. For shared SPI3 devices, always centralize chip-select handling so Flash and LCD are never selected at the same time.
+7. Before relying on a build instruction, check the target project's environment record. If it is missing or stale, probe the current machine and update the project-level `AGENTS.md` first.
+8. Before writing driver code, check whether relevant shared documentation or source exists under root `docs/hardware/`, `docs/software/`, `docs/drivers/`, or `drivers/`. If a project copies shared driver code into its own tree, record the source, local modifications, and verification status in the project-level `AGENTS.md`.
 
 For Codex work, `AGENTS.md` is the primary instruction file. `CLAUDE.md` may be created or kept alongside it for Claude Code compatibility when a project is intended to support both tools. When both files exist, keep their operational rules consistent; project setup, build commands, hardware assumptions, and verification steps should not diverge between them.
 
@@ -120,7 +146,9 @@ When the user asks to create, modify, debug, or explain a concrete firmware proj
 2. Read the relevant software guide before changing code structure or BSP/peripheral logic:
    - `docs/software/project-template.md` for new project layout or build settings.
    - `docs/software/board-bsp-guide.md` for reusable onboard peripheral drivers.
-   - `docs/software/spl-quick-reference.md` for SPL initialization details.
+   - `docs/software/base-libraries.md` for SPL versus HAL/LL dependency selection.
+   - `docs/software/spl-quick-reference.md` for SPL initialization details when SPL is the selected stack.
+   - `docs/drivers/` and `drivers/` for shared driver documentation and reusable driver source when the project needs an external module or reusable board driver.
 3. Identify the target project directory first.
 4. Work from inside that project directory.
 5. If the target directory contains `AGENTS.md`, read it before inspecting or changing project files.
@@ -138,11 +166,11 @@ If the target architecture is neither SPL/Keil nor HAL/Keil, create the new proj
 A project-level `AGENTS.md` should be short but operational. Include at least:
 
 - Project purpose and target board/chip.
-- Toolchain and IDE, such as Keil v5, VS Code + EIDE, ARMCC, ARMClang, GCC, or `arm-none-eabi`.
-- Build, clean, flash, and debug commands or manual IDE steps.
+- Environment initialization result for this project: Keil availability/path, ARMCC or ARMClang version, STM32F4 pack status, EIDE availability, GCC/make/cmake availability, and flash/debug tool availability.
+- Build, clean, flash, and debug commands or manual IDE steps that are valid for this project on the initialized machine.
 - Source entrypoints, BSP modules used, software stack selection, and important generated/vendor directories.
 - Hardware dependencies from the board schematic. Reference specific sections of `docs/hardware/schematic-stm32f407-board-c-v1.0.md` that apply to the project, including GPIO mappings, active-high or active-low logic, peripheral electrical parameters, and shared-bus constraints. If the project uses board peripherals such as LEDs, keys, buzzer, DHT11, Flash, LCD, or USART, explicitly document the confirmed electrical behavior.
-- Software references used from `docs/software/`, especially whether the project follows the standard template, BSP guide, and SPL quick-reference patterns.
+- Software references used from `docs/software/`, especially whether the project follows the standard template, BSP guide, SPL quick-reference patterns, or HAL/LL dependency guidance.
 - Directories or files that should not be edited casually, such as packs, generated build output, IDE metadata, or vendor libraries.
 - Verification steps for the project, including compile, flash, debug connection, and hardware behavior.
 
@@ -214,5 +242,5 @@ During debugging:
 
 - Add or update root-level docs only for workspace-wide rules, hardware references, or shared operating conventions.
 - Do not modify `example/minimal_spl_keil/` or `example/minimal_hal_keil/` while performing root documentation work unless the user explicitly asks for template or project-level changes.
-- Do not assume `practice/` exists in this public repository; it is normally a local user-created directory.
+- Do not assume `projects/` exists in this public repository; it is normally a local user-created directory.
 - Do not run firmware builds from the root unless the target project and build method are clear.

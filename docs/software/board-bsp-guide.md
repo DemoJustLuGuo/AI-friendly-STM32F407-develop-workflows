@@ -1,10 +1,10 @@
 # STM32F407 Board Support Package (BSP) Design Guide
 
 **Target Board**: STM32F407ZGT6 Development Board  
-**Repository Role**: AI-friendly STM32F407 workflow base
-**Library**: STM32F4xx Standard Peripheral Library V1.3.0
+**Repository Role**: STM32F407-AI-develop-workflows base
+**Firmware Stack**: Stack-neutral BSP API; code examples use STM32F4xx SPL V1.3.0
 
-This document defines the Board Support Package (BSP) architecture and API specifications for the STM32F407 development board. The BSP provides unified, reusable driver interfaces for all onboard peripherals, enabling rapid firmware development across multiple projects.
+This document defines the Board Support Package (BSP) architecture and API specifications for the STM32F407 development board. The BSP provides unified, reusable driver interfaces for onboard peripherals across SPL and HAL/LL projects. The examples in this guide use SPL calls; HAL/LL projects should keep the same BSP-facing API and replace only the low-level GPIO/peripheral implementation.
 
 ---
 
@@ -29,7 +29,7 @@ This document defines the Board Support Package (BSP) architecture and API speci
 ### Design Principles
 
 1. **Hardware Abstraction**: Hide hardware details behind clean APIs
-2. **Reusability**: One BSP codebase shared across all practice projects
+2. **Reusability**: One BSP-facing API style shared across firmware projects
 3. **Modularity**: Each peripheral is an independent module with init/deinit functions
 4. **Consistency**: Unified naming conventions and return types
 5. **Safety**: Input validation and error handling
@@ -39,14 +39,14 @@ This document defines the Board Support Package (BSP) architecture and API speci
 
 ```
 ┌─────────────────────────────────────────┐
-│   Application Code (practice projects)  │
+│   Application Code (firmware projects)  │
 ├─────────────────────────────────────────┤
 │   BSP API Layer (bsp_*.h/c)            │
 │   - bsp_led, bsp_key, bsp_beep         │
 │   - bsp_dht11, bsp_spi, bsp_usart      │
 ├─────────────────────────────────────────┤
-│   STM32F4xx Standard Peripheral Library │
-│   - stm32f4xx_gpio, stm32f4xx_spi, etc.│
+│   SPL or HAL/LL implementation layer    │
+│   - GPIO, SPI, USART, SysTick, etc.     │
 ├─────────────────────────────────────────┤
 │   STM32F407 Hardware                    │
 └─────────────────────────────────────────┘
@@ -1353,7 +1353,7 @@ void read_temperature_humidity(void)
 - **Hardware Reference**: `docs/hardware/schematic-stm32f407-board-c-v1.0.md`
 - **SPL Quick Reference**: `docs/software/spl-quick-reference.md`
 - **Workspace Guide**: `AGENTS.md`, with `CLAUDE.md` compatibility when Claude Code is used
-- **Example Projects**: `practice/` directory
+- **Project Workspace**: `projects/` directory in downstream local workspaces
 
 ---
 

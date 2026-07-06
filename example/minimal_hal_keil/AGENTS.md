@@ -15,6 +15,20 @@ The default firmware is only a board heartbeat: initialize HAL, configure the sy
 - Device macro: `STM32F407xx`
 - Other required defines: `USE_HAL_DRIVER`, `HSE_VALUE=8000000`
 
+## Environment Initialization Status
+
+Status: not initialized after copy.
+
+The first coding agent working on this project must probe the current machine and replace this section with confirmed facts:
+
+- Keil MDK-ARM v5 installed: yes/no; `UV4.exe` or `UV5.exe` path if available.
+- Keil compiler selected by this project: ARMCC5 or ARMClang6; note whether `.uvprojx` migration is required.
+- STM32F4 Device Family Pack installed: yes/no and version if known.
+- VS Code + EIDE available: yes/no; compiler path used by EIDE if applicable.
+- `arm-none-eabi-gcc`, `make`, and `cmake` available: yes/no with paths if used.
+- Flash/debug tool available: ST-Link, J-Link, OpenOCD, pyOCD, or manual IDE-only flow.
+- Verified build command or manual build steps for this machine.
+
 ## Source Entrypoints
 
 - `User/main.c`: HAL initialization, clock setup, LED GPIO init, and heartbeat loop
